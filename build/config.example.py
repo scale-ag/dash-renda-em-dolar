@@ -58,6 +58,11 @@ AD_UTM_COLUMN = "<<PREENCHER: utm_content | utm_term | utm_medium — a coluna q
 # <<PREENCHER: True se toda linha é venda paga; False se há coluna Status confiável>>
 COUNT_ALL_AS_PAID = True
 
+# Vendas anteriores a esta data (AAAA-MM-DD) ficam de fora do dashboard.
+# Use o início das queries do Meta Ads para não haver venda sem gasto.
+# Vazio = considera todas as vendas.
+SALES_START_DATE = ""
+
 # Valores de utm_source que identificam venda vinda do Meta Ads. Venda do
 # produto principal com essa origem conta na aba Meta Ads mesmo se a UTM não
 # casar com uma linha do Meta. Vazio = só o match campanha+anúncio vale.

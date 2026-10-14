@@ -98,6 +98,10 @@ if AD_UTM_COLUMN not in _AD_UTM_VALIDAS:
 # parâmetro quebrado...). Vazio -> só o match campanha+anúncio define meta=1.
 META_UTM_SOURCES = {v.strip().lower() for v in getattr(cfg, "META_UTM_SOURCES", ()) if v}
 
+# Data mínima (AAAA-MM-DD) das vendas consideradas — ex.: início das queries do
+# Meta Ads, para não comparar vendas sem o gasto correspondente. Vazio = todas.
+SALES_START_DATE = (getattr(cfg, "SALES_START_DATE", "") or "").strip()
+
 EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
 META_CSV_URL = EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_META)
 SALES_CSV_URL = EXPORT_URL.format(sid=SPREADSHEET_ID_SALES, gid=GID_SALES)
@@ -369,6 +373,8 @@ def process(meta_rows, sales_rows):
         meta_hit = (ad_map.get((norm(sale_camp), norm(ad)))
                     or ad_map_loose.get((loose_name(sale_camp), loose_name(ad))))
         sale_day = parse_date(cell(row, sidx["created"]))
+        if SALES_START_DATE and (sale_day or "") < SALES_START_DATE:
+            continue
         src_meta = (norm(cell(row, sidx["utm_source"])) in META_UTM_SOURCES
                     and meta_first_day is not None and (sale_day or "") >= meta_first_day)
         # Atribuição ao tráfego rastreado: produto principal OU par campanha+anúncio

@@ -57,6 +57,11 @@ AD_UTM_COLUMN = "utm_content"   # utm_term traz o posicionamento (Instagram_Feed
 # DADOS_HOTMART não tem coluna de status: toda linha é compra aprovada.
 COUNT_ALL_AS_PAID = True
 
+# Vendas anteriores a esta data (AAAA-MM-DD) ficam de fora do dashboard.
+# Use o início das queries do Meta Ads para não haver venda sem gasto.
+# Vazio = considera todas as vendas.
+SALES_START_DATE = "2026-08-01"
+
 # Valores de utm_source que identificam venda vinda do Meta Ads. Venda do
 # produto principal com essa origem conta na aba Meta Ads mesmo se a UTM não
 # casar com uma linha do Meta. Vazio = só o match campanha+anúncio vale.

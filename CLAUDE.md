@@ -123,8 +123,9 @@ Verificado em 14/10/2026:
   `build/config.py`): venda do produto principal com FB conta na aba Meta Ads mesmo
   sem achar a linha exata do Meta (fica na campanha da UTM, sem gasto associado).
   Outras origens: `organic`/`organico`/`ig`/vazio.
-- Janelas: Meta Ads começa em **01/08/2026**; DADOS_HOTMART desde 12/2025. Antes de
-  agosto só há vendas (sem gasto). Sem coluna de status (toda linha = compra
+- Janelas: Meta Ads começa em **01/08/2026**; DADOS_HOTMART desde 12/2025. Para não
+  haver venda sem gasto, `SALES_START_DATE = "2026-08-01"` em `build/config.py`
+  descarta as vendas anteriores. Sem coluna de status (toda linha = compra
   aprovada → `COUNT_ALL_AS_PAID = True`); reembolsos ficam na aba
   DADOS_HOTMART_REEMBOLSO (não usada).
 - Não usar as outras abas da planilha de vendas (FINANCEIRO, FCA, CRIATIVOS,
