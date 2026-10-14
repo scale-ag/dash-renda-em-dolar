@@ -1,4 +1,4 @@
-# AGENTS.md — Dashboard de Controle de Tráfego Pago (TEMPLATE)
+# AGENTS.md — Dashboard de Controle de Tráfego Pago (Bruno Corano — Renda em Dólar)
 
 > Instruções para agentes de código (Codex, Claude Code e afins). O contexto
 > completo do projeto — fontes de dados, regra de atribuição, métricas,
@@ -10,11 +10,13 @@
 ## ✅ CHECKLIST DE NOVO CLIENTE
 
 Ordem para colocar um cliente novo no ar. Todo valor específico do cliente está
-marcado como `<<PREENCHER: descrição>>` — ao final, este comando **não pode
-retornar nada** (exceto este checklist e o guard em `build/build.py`):
+marcado com o marcador de preenchimento do template — ao final, este comando
+**não pode retornar nada** (o guard em `build/build.py` e o modelo
+`build/config.example.py` ficam de fora de propósito). **Status deste repo:
+preenchido em 14/10/2026** (itens de Cloudflare/IA Insights e Routine pendentes).
 
 ```bash
-grep -rn "<<PREENCHER" --exclude-dir=.git . | grep -v -E "^\./(CLAUDE|AGENTS)\.md:|build/build\.py:|build/config\.example\.py:"
+grep -rn "<<PREENCHE[R]" --exclude-dir=.git . | grep -v -E "build/build\.py:|build/config\.example\.py:"
 ```
 
 1. [ ] **Criar o repositório do cliente** a partir deste template ("Use this
@@ -66,8 +68,8 @@ grep -rn "<<PREENCHER" --exclude-dir=.git . | grep -v -E "^\./(CLAUDE|AGENTS)\.m
 
 ## Projeto
 
-- **Cliente/funil:** <<PREENCHER: nome do cliente — nome do funil/lançamento>>
-- **URL pública:** `<<PREENCHER: URL do GitHub Pages, ex.: https://<owner>.github.io/<repo>/>>`
+- **Cliente/funil:** Bruno Corano — Renda em Dólar (Funil VSL, sigla `RD`)
+- **URL pública:** `https://scale-ag.github.io/dash-renda-em-dolar/`
 - **Tipo de funil:** lançamento pago / tráfego direto —
   `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`
 
@@ -78,7 +80,7 @@ grep -rn "<<PREENCHER" --exclude-dir=.git . | grep -v -E "^\./(CLAUDE|AGENTS)\.m
   `build/identidade-visual.css`, `build/gerar_relatorios.py`,
   `ia-worker/worker.js`, `.github/workflows/*`, `GUIA-REPLICACAO.md`,
   `build/GUIA-RELATORIOS.md`). Valores do cliente vão em `build/config.py`,
-  `config.js`, `ia-worker/wrangler.toml` e nos marcadores `<<PREENCHER>>` dos docs.
+  `config.js`, `ia-worker/wrangler.toml` e nos docs.
 - **Somente leitura** das planilhas: o build só lê o export CSV público.
 - **Nunca** grave tokens, chaves (`ANTHROPIC_API_KEY`), senha da IA Insights ou
   credenciais da Cloudflare em arquivos do repositório — elas vivem só nos

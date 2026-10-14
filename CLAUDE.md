@@ -1,8 +1,8 @@
-# CLAUDE.md — Dashboard de Controle de Tráfego Pago (TEMPLATE)
+# CLAUDE.md — Dashboard de Controle de Tráfego Pago (Bruno Corano — Renda em Dólar)
 
 > Este arquivo é lido automaticamente pelo Claude Code ao abrir o repositório.
-> **TEMPLATE** — configurado para o cliente **<<PREENCHER: nome do cliente>>**
-> (funil "<<PREENCHER: nome do funil/lançamento>>", sigla `<<PREENCHER: sigla do funil usada nas campanhas>>`).
+> Configurado para o cliente **Bruno Corano**
+> (funil "Renda em Dólar — Funil VSL" perpétuo, sigla `RD`).
 > A engine (`build/template.html`, `build/build.py`, `build/app.js`, CSS,
 > `ia-worker/worker.js`, workflows) é genérica e não deve ser editada por
 > cliente; os valores do cliente ficam em **`build/config.py`** (config do funil)
@@ -13,11 +13,13 @@
 ## ✅ CHECKLIST DE NOVO CLIENTE
 
 Ordem para colocar um cliente novo no ar. Todo valor específico do cliente está
-marcado como `<<PREENCHER: descrição>>` — ao final, este comando **não pode
-retornar nada** (exceto este checklist e o guard em `build/build.py`):
+marcado com o marcador de preenchimento do template — ao final, este comando
+**não pode retornar nada** (o guard em `build/build.py` e o modelo
+`build/config.example.py` ficam de fora de propósito). **Status deste repo:
+preenchido em 14/10/2026** (itens de Cloudflare/IA Insights e Routine pendentes).
 
 ```bash
-grep -rn "<<PREENCHER" --exclude-dir=.git . | grep -v -E "^\./(CLAUDE|AGENTS)\.md:|build/build\.py:|build/config\.example\.py:"
+grep -rn "<<PREENCHE[R]" --exclude-dir=.git . | grep -v -E "build/build\.py:|build/config\.example\.py:"
 ```
 
 1. [ ] **Criar o repositório do cliente** a partir deste template ("Use this
@@ -74,8 +76,8 @@ via CDN) publicado no **GitHub Pages**, que cruza o gerenciador **Meta Ads** com
 de **Compradores** e se atualiza a cada ~30 min (build na nuvem via GitHub Actions,
 disparado pelo cron-job.org). **Somente leitura** das planilhas.
 
-- **URL pública:** `<<PREENCHER: URL do GitHub Pages, ex.: https://<owner>.github.io/<repo>/>>`
-- **Cliente/projeto:** <<PREENCHER: nome do cliente — nome do funil/lançamento>>
+- **URL pública:** `https://scale-ag.github.io/dash-renda-em-dolar/`
+- **Cliente/projeto:** Bruno Corano — Renda em Dólar (Funil VSL perpétuo)
   (rótulos exibidos vêm de `CLIENT_NAME`/`CLIENT_SUB` em `build/config.py`)
 - **Tipo de funil:** lançamento pago / tráfego direto (não há etapa de Leads/MQL) —
   `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`
@@ -88,30 +90,49 @@ preencha também `SPREADSHEET_ID_SALES` em `build/config.py`.
 
 | Fonte | Planilha (`SPREADSHEET_ID*`) | gid | Aba |
 |-------|------------------------------|-----|-----|
-| **Meta Ads** | `<<PREENCHER: SPREADSHEET_ID>>` | `<<PREENCHER: GID_META>>` | <<PREENCHER: nome da aba Meta Ads>> |
-| **Compradores** | `<<PREENCHER: SPREADSHEET_ID_SALES ou o mesmo SPREADSHEET_ID>>` | `<<PREENCHER: GID_SALES>>` | <<PREENCHER: nome da aba de Compradores/Vendas>> |
+| **Meta Ads** | `1iIMkIbI7Ks-fxxaB0Lq0UHXRLcPYHsdMnSUqNfWwlGA` ("RD \| Extração Queries") | `0` | Meta Ads |
+| **Compradores** | `1IhhBlPT6TBcI9FBMcO_zcP8SDK0ctYuwEv8vvSEF1Ow` ("RD-P01 \| ACOMPANHAMENTO GERAL \| LOOKER") | `953734831` | DADOS_HOTMART |
 
 **Colunas reais — Meta Ads** (o `header_index` do `build.py` casa por nome, a
 ordem não importa):
-<<PREENCHER: lista das colunas da aba Meta Ads, ex.: Day · Campaign Name · Ad Set Name · Ad Name · Amount Spent · Impressions · Link Clicks · Landing Page Views · Checkouts Initiated>>
+Day · Campaign Name · Ad Set Name · Ad Name · Impressions · Link Clicks · Landing Page Views · Checkouts Initiated · Amount Spent
+(sem coluna de permalink do criativo; sem IDs de campanha/anúncio).
 
 **Colunas reais — Compradores** (as usadas pelo build: data, nome, e-mail,
 produto, valor/faturamento, utm_campaign, utm_medium, coluna de `AD_UTM_COLUMN`,
 status se houver):
-<<PREENCHER: lista das colunas da aba de Compradores e qual delas é a receita>>
+data · hora_compra · nome · email · telefone · utm_campaign · utm_source · utm_content · utm_medium ·
+utm_term · sck · src · xcod · produto · produto_id · oferta · oferta_id · **Valor** (receita, ex. `R$ 297,00`) ·
+tipo pagamento · HP · provider (HOTMART / THEMEMBERS). Sem coluna de status.
 
 ### Pontos de atenção deste cliente
 
-<<PREENCHER: particularidades verificadas na planilha (data da verificação) —
-ex.: qual coluna UTM carrega o Ad Name e quantos valores batem com o Meta,
-janelas de data sem sobreposição, ausência de coluna de status, coluna de
-receita (bruta/líquida), ausência da coluna de permalink do criativo, abas que
-NÃO devem ser usadas. Apague este bloco se não houver nada a registrar.>>
+Verificado em 14/10/2026:
+- **Ad Name está em `utm_content`**; `utm_term` traz o posicionamento
+  (Instagram_Feed/Reels/Stories), `utm_medium` traz o conjunto.
+- **UTMs vêm como `nome|id`** (`{{campaign.name}}|{{campaign.id}}`). O build tira o
+  sufixo `|<id>` antes do match. Há também UTMs quebradas (`{{ad.name}}|{{ad.id}}`
+  sem substituir, `#VALUE!`) — essas não casam.
+- **Campanhas renomeadas no Meta:** a UTM guarda o nome antigo. Ex.: UTM
+  `... [CRIATIVOS VALIDADOS] — Cópia` ↔ Meta `... [CRIATIVOS VALIDADOS]`; UTM
+  `... [CRIATIVOS CAMPEÕES SETEMBRO]` ↔ Meta `ANTIGO ... [CRIATIVOS CAMPEÕES SETEMBRO]`.
+  O build tenta o match exato primeiro e, se falhar, um 2º passo ignorando
+  ` — Cópia` e o prefixo `ANTIGO ` — **só quando o nome resultante aponta para uma
+  única campanha/anúncio do Meta** (ambíguo → não atribui).
+- **`utm_source = FB` = venda do Meta Ads** (`META_UTM_SOURCES = ["fb"]` em
+  `build/config.py`): venda do produto principal com FB conta na aba Meta Ads mesmo
+  sem achar a linha exata do Meta (fica na campanha da UTM, sem gasto associado).
+  Outras origens: `organic`/`organico`/`ig`/vazio.
+- Janelas: Meta Ads começa em **01/08/2026**; DADOS_HOTMART desde 12/2025. Antes de
+  agosto só há vendas (sem gasto). Sem coluna de status (toda linha = compra
+  aprovada → `COUNT_ALL_AS_PAID = True`); reembolsos ficam na aba
+  DADOS_HOTMART_REEMBOLSO (não usada).
+- Não usar as outras abas da planilha de vendas (FINANCEIRO, FCA, CRIATIVOS,
+  LINKS CRIATIVOS, PERFORMANCE_LP, [SEND] - META ADS / GOOGLE ADS).
 
 ### Critério de MQL
 
-Funil de lançamento pago sem etapa de Leads/MQL. <<PREENCHER: confirmar com o
-gestor se há critério de MQL; se não houver, manter "não há etapa de MQL nesta dashboard".>>
+Funil VSL perpétuo sem etapa de Leads/MQL — não há etapa de MQL nesta dashboard.
 
 URL de export CSV: `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/export?format=csv&gid={GID}`
 
@@ -124,7 +145,7 @@ ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket 
 
 ### Produto principal / atribuição
 - **Produto principal** = `MAIN_PRODUCT_PREFIX` (definido em `build/config.py`) —
-  neste cliente: <<PREENCHER: nome do produto principal como aparece na planilha>>.
+  neste cliente: `renda em dolar` → "Renda em Dólar Oficial", "Renda Em Dólar", "Renda em Dolar.".
   Base de **Vendas / CAC / ConvCHK / Ticket**.
 - **Faturamento / ROAS** = soma de **todos os produtos** do funil (orderbumps/upsells).
 - Uma venda entra no funil se: é o produto principal **OU** a combinação
@@ -137,7 +158,8 @@ ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket 
   recebe `meta=1` (é o que a aba Meta Ads considera tráfego pago). Vendas de outros
   funis (UTM/produto não relacionados) ficam de fora. Só conta status pago (ou todas
   as linhas, se `COUNT_ALL_AS_PAID = True`).
-- <<PREENCHER: regra de atribuição específica deste cliente, se diferente da padrão acima; senão apague esta linha.>>
+- Específico deste cliente: UTMs sem o sufixo `|id`, 2º passo de match sem ` — Cópia`/`ANTIGO `
+  e `utm_source = FB` também marca `meta=1` (ver "Pontos de atenção").
 - Se não houver coluna de Receita, não há Receita/ROAS/Ticket — ajuste o texto desta
   seção se o cliente tiver uma regra diferente.
 
@@ -145,12 +167,13 @@ ConvCHK (Vendas/Checkouts) · Faturamento · ROAS (Faturamento/Gasto) · Ticket 
 Toggle ON aplica o `TAX_FACTOR` (definido em `build/config.py`) sobre os custos do Meta.
 
 ### Convenções de campanha
-- Nomenclatura de campanha: `<<PREENCHER: padrão do nome de campanha, ex.: SIGLA | ETAPA | TEMPERATURA | ...>>`
-- Nomenclatura de conjunto: `<<PREENCHER: padrão do nome de conjunto>>`
-- Nomenclatura de anúncio: `<<PREENCHER: padrão do nome de anúncio>>`
+- Nomenclatura de campanha: `[SEND] - [PERPÉTUO] [RD] [VENDAS] [VSL] [PV Vx] [IG] [FRIO] - [ESTRATÉGIA] - [DETALHE]`
+  (também `[RD] [P2-FRIO] [VENDAS] [CBO] [AAAA-MM-DD] [PV Vx] - TESTE ...`; prefixo `ANTIGO ` = campanha arquivada/renomeada)
+- Nomenclatura de conjunto: `00 - Aberto ADV+` (variações `| Página rd-vXt`, `Lookalike 2% ...`)
+- Nomenclatura de anúncio: `AD_[RD]_[VIDEO]_[CRIATIVO 0085]_[VB]` (opcional `_[HOOK 02]`; VB/VL = variação)
 - Mapeamento UTM → Meta neste cliente (verificado nos dados):
   `utm_campaign → Campaign Name` · `utm_medium → Ad Set Name` ·
-  `<<PREENCHER: coluna de AD_UTM_COLUMN>> → Ad Name`.
+  `utm_content → Ad Name` (todas no formato `nome|id`).
 
 O match com o Meta (campo `meta`, usado pela aba Meta Ads) exige `utm_campaign` +
 a coluna de `AD_UTM_COLUMN` batendo com uma linha real do Meta; quando casa, a venda
@@ -179,7 +202,7 @@ pelo `build.py` no `render()` — assim dá para mexer só em cor/layout sem toc
 
 ```
 build/build.py             # ENGINE: lê os 2 CSVs (read-only), emite meta[]/sales[] e COSTURA os arquivos abaixo
-build/config.py            # CONFIG DO CLIENTE (troque os marcadores <<PREENCHER>>)
+build/config.py            # CONFIG DO CLIENTE (preenchido)
 build/config.example.py    # modelo comentado de build/config.py
 build/template.html        # esqueleto HTML (placeholders __STYLES__ / __APP_JS__ / __DATA_JSON__)
 build/identidade-visual.css # ⭐ TODAS as cores (temas claro/escuro, paleta de gráficos, heatmap). Edite AQUI p/ mexer só em cor.
@@ -189,14 +212,14 @@ build/app.js               # lógica + renderização (gráficos/heatmap leem as
 .github/workflows/deploy-worker.yml  # publica o Worker da IA Insights (Cloudflare)
 .github/workflows/gerar-relatorios-metrics.yml # 23:50 BRT: busca as planilhas e commita relatorios_metrics.json
 ia-worker/worker.js    # backend da aba IA Insights (ENGINE — não editar por cliente)
-ia-worker/wrangler.toml # nome do Worker (marcador <<PREENCHER>> no campo name)
+ia-worker/wrangler.toml # nome do Worker (renda-em-dolar-ia-insights)
 build/relatorios.json  # briefings do Gestor por período (aba Relatórios) — VERSIONADO (criado pela Routine; não vem no template)
 build/relatorios_metrics.json # números por período (gerado pelo Actions, lido pela Routine) — VERSIONADO (criado pelo Actions; não vem no template)
 build/gerar_relatorios.py # calcula as métricas por período (rodado pelo Actions, não pela Routine)
 build/GUIA-RELATORIOS.md  # passo a passo da Routine que regenera os briefings
 dist/index.html        # saída gerada (gitignored; o Actions reconstrói)
 GUIA-REPLICACAO.md     # engine explicada + solução dos problemas de publicação
-config.js               # metadados de publicação (GitHub) — marcadores <<PREENCHER>>
+config.js               # metadados de publicação (GitHub) — scale-ag/dash-renda-em-dolar
 config.example.js       # cópia vazia de config.js, para referência
 AGENTS.md               # checklist + resumo para outros agentes (Codex etc.)
 SETUP-CRON.md          # valores do cron-job.org (owner/repo com marcadores)

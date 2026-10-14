@@ -1,10 +1,10 @@
-# Dashboard de Controle de Tráfego Pago — <<PREENCHER: nome do cliente>> / <<PREENCHER: nome do funil/lançamento>>
+# Dashboard de Controle de Tráfego Pago — Bruno Corano / Renda em Dólar (Funil VSL)
 
-> **TEMPLATE.** Antes de publicar, siga o **CHECKLIST DE NOVO CLIENTE** no topo
-> do `CLAUDE.md` (ou `AGENTS.md`) e troque todos os marcadores `<<PREENCHER: ...>>`.
+> Criado a partir do template de dashboard de tráfego pago, já configurado para
+> **Bruno Corano — Renda em Dólar** (funil VSL perpétuo, sigla `RD`).
 > Os valores do cliente ficam em `build/config.py`; a engine
 > (`build/build.py`, `build/template.html`, `build/app.js`, `ia-worker/worker.js`)
-> é genérica. Publicado em <<PREENCHER: URL do GitHub Pages, ex.: https://<owner>.github.io/<repo>/>>
+> é genérica. Publicado em https://scale-ag.github.io/dash-renda-em-dolar/
 
 ## Visão geral
 
@@ -16,7 +16,7 @@ leitura** das planilhas — o dashboard nunca escreve nelas.
 
 Funil coberto: **lançamento pago / tráfego direto** (sem etapa de Leads/MQL) —
 `Gasto → Impressões → Cliques → Page Views → Checkouts → Vendas → Faturamento`.
-Produto principal: **<<PREENCHER: nome do produto principal>>**.
+Produto principal: **Renda em Dólar** (Hotmart / The Members — "Renda em Dólar Oficial", "Renda Em Dólar").
 
 Como funciona, por dentro:
 
@@ -54,7 +54,7 @@ opcionalmente, o Cloudflare Workers (também com camada gratuita) para a IA.
 
 1. Crie o repositório a partir deste template (veja "Como publicar no GitHub"
    abaixo).
-2. Troque os marcadores `<<PREENCHER>>` de `build/config.py` pelos dados do
+2. Preencha `build/config.py` pelos dados do
    cliente (veja "Como configurar a planilha" abaixo).
 3. Troque os marcadores de `config.js` pelos metadados do GitHub
    (veja "Como preencher o config.js" abaixo).
@@ -94,11 +94,10 @@ normalmente você não precisa mexer em nada manualmente. Para conferir/forçar:
    **Actions** → workflow **"Build & Deploy Dashboard"** → **Run workflow**
    (branch `main`).
 4. Depois do primeiro deploy bem-sucedido, a URL pública aparece em **Settings
-   → Pages** e é sempre `https://<<PREENCHER: owner>>.github.io/<<PREENCHER: repositório>>/`.
+   → Pages** e é sempre `https://scale-ag.github.io/dash-renda-em-dolar/`.
 5. Configure o cron-job.org para dar continuidade aos builds automáticos a cada
    30 min — passo a passo completo em **`SETUP-CRON.md`** (ele vem com
-   marcadores `<<PREENCHER>>` de owner/repo para você substituir pelos
-   valores do seu `config.js`).
+   owner/repo já preenchidos).
 
 ## Como configurar a planilha/API (Google Sheets)
 
@@ -136,7 +135,7 @@ com prints e troubleshooting, está em **`SETUP-IA.md`**. Resumo:
    variables → Actions**): `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
    `ANTHROPIC_API_KEY`, `INSIGHTS_PASSWORD`.
 4. Ajuste `ia-worker/wrangler.toml` (`name = "..."`, troque o marcador
-   `<<PREENCHER: nome-do-worker>>`).
+   pelo nome do Worker — aqui `renda-em-dolar-ia-insights`).
 5. Um commit tocando qualquer arquivo em `ia-worker/` dispara o deploy
    automático do Worker (`.github/workflows/deploy-worker.yml`), que também
    cria o KV namespace de persistência e aplica os secrets.
@@ -166,10 +165,9 @@ Passo a passo:
 1. Abra `config.js` (já existe no template; `config.example.js` é a cópia vazia de referência).
 2. Preencha `GITHUB_USERNAME`, `GITHUB_REPOSITORY` e `PROJECT_NAME`.
 3. Use esses **mesmos valores** para substituir manualmente os marcadores
-   `<<PREENCHER: ...>>` de owner/repo/URL que aparecem em `SETUP-CRON.md`,
+   marcadores de owner/repo/URL que aparecem em `SETUP-CRON.md`,
    `README.md` (este arquivo), `CLAUDE.md` e `AGENTS.md` — são documentos
-   Markdown estáticos, então a substituição não é automática (busque por
-   `<<PREENCHER` no repositório).
+   Markdown estáticos, então a substituição não é automática (busque pelos marcadores no repositório).
 
 A configuração que **de fato** é lida pelo build (planilha, produto, imposto,
 metas, URL do Worker) fica em `build/config.py` — ver "Como configurar a
