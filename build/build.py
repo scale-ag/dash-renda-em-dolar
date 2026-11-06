@@ -102,6 +102,11 @@ META_UTM_SOURCES = {v.strip().lower() for v in getattr(cfg, "META_UTM_SOURCES", 
 # Meta Ads, para não comparar vendas sem o gasto correspondente. Vazio = todas.
 SALES_START_DATE = (getattr(cfg, "SALES_START_DATE", "") or "").strip()
 
+# Data mínima (AAAA-MM-DD) das linhas do Meta Ads consideradas — útil quando a
+# planilha de extração ganha histórico anterior ao início da dashboard e não se
+# quer mudar a janela já publicada. Vazio = todas as linhas.
+META_START_DATE = (getattr(cfg, "META_START_DATE", "") or "").strip()
+
 EXPORT_URL = "https://docs.google.com/spreadsheets/d/{sid}/export?format=csv&gid={gid}"
 META_CSV_URL = EXPORT_URL.format(sid=SPREADSHEET_ID, gid=GID_META)
 SALES_CSV_URL = EXPORT_URL.format(sid=SPREADSHEET_ID_SALES, gid=GID_SALES)
@@ -293,6 +298,8 @@ def process(meta_rows, sales_rows):
         if not any((c or "").strip() for c in row):
             continue
         if is_test_row(" ".join(str(c) for c in row)):
+            continue
+        if META_START_DATE and (parse_date(cell(row, midx["day"])) or "") < META_START_DATE:
             continue
         camp = cell(row, midx["campaign"]) or "(sem campanha)"
         adset = cell(row, midx["adset"]) or "(sem conjunto)"

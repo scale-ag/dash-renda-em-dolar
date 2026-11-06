@@ -63,6 +63,11 @@ COUNT_ALL_AS_PAID = True
 # Vazio = considera todas as vendas.
 SALES_START_DATE = ""
 
+# Linhas do Meta Ads anteriores a esta data (AAAA-MM-DD) ficam de fora.
+# Use para manter a janela da dashboard quando a planilha ganha histórico
+# mais antigo. Vazio = considera todas as linhas do Meta.
+META_START_DATE = ""
+
 # Valores de utm_source que identificam venda vinda do Meta Ads. Venda do
 # produto principal com essa origem conta na aba Meta Ads mesmo se a UTM não
 # casar com uma linha do Meta. Vazio = só o match campanha+anúncio vale.
