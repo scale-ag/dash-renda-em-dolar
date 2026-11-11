@@ -229,10 +229,13 @@ function hbar(id, items, valFn, color, top, fmtFn){
 }
 /* CAC por dia, por item de uma dimensão (campanha/conjunto/anúncio) - 1 linha por item.
    `dim` = 'camp' | 'adset' | 'ad'; usa os mesmos dados escopados da tabela acima. */
-function cacDimChart(id, fM, fS, dim){
+function cacDimChart(id, fM, fS, dim, sel){
   destroy(id); const el=document.getElementById(id); if(!el) return;
   const spendTot={}; fM.forEach(r=>spendTot[r[dim]]=(spendTot[r[dim]]||0)+r.sp);
-  const items=Object.keys(spendTot).sort((a,b)=>spendTot[b]-spendTot[a]).slice(0,6);
+  // Com itens selecionados na tabela acima, o gráfico mostra só eles; sem
+  // seleção, os 6 de maior gasto.
+  const items=Object.keys(spendTot).filter(k=>!sel||!sel.size||sel.has(k))
+    .sort((a,b)=>spendTot[b]-spendTot[a]).slice(0,sel&&sel.size?12:6);
   const dset=new Set(); fM.forEach(r=>r.d&&dset.add(r.d)); fS.forEach(r=>r.d&&dset.add(r.d));
   const days=[...dset].sort();
   const K=(c,dd)=>c+'\u0001'+dd, sp={}, vd={};
@@ -367,11 +370,17 @@ function metaScope(ex){ let fM=metaActive(), fS=salesActive().filter(s=>s.meta);
   if(ex!=='A'&&STATE.mSelA.size){ fM=fM.filter(r=>STATE.mSelA.has(r.adset)); fS=fS.filter(r=>STATE.mSelA.has(r.adset)); }
   if(ex!=='D'&&STATE.mSelAd.size){ fM=fM.filter(r=>STATE.mSelAd.has(r.ad)); fS=fS.filter(r=>STATE.mSelAd.has(r.ad)); }
   return {fM,fS}; }
+/* Seleção em funil (Campanha → Conjunto → Anúncio, como no Gerenciador do Meta):
+   clicar num nível mantém os filtros dos níveis ACIMA e limpa só os de baixo —
+   assim um conjunto/anúncio clicado com a campanha filtrada fica restrito a ela.
+   Ctrl/Cmd+clique soma/remove itens do mesmo nível. */
 function selDim(dim,key,ctrl){
   const sets={C:STATE.mSelC,A:STATE.mSelA,D:STATE.mSelAd}, s=sets[dim];
+  const below={C:['A','D'],A:['D'],D:[]}[dim];
   if(ctrl){ s.has(key)?s.delete(key):s.add(key); }
-  else { const sole=s.has(key)&&s.size===1&&!Object.entries(sets).some(([k2,x])=>k2!==dim&&x.size);
-    Object.values(sets).forEach(x=>x.clear()); if(!sole) s.add(key); }
+  else { const sole=s.has(key)&&s.size===1;
+    s.clear(); if(!sole) s.add(key); }
+  below.forEach(k=>sets[k].clear());
   renderMeta();
 }
 function metaPrevTotals(pw){
@@ -415,9 +424,9 @@ function renderMeta(){
     selectable:true, selSet:STATE.mSelAd, onSelect:(k,e)=>selDim('D',k,e&&(e.ctrlKey||e.metaKey))});
 
   /* cada gráfico segue a dimensão da tabela acima (mesmos dados escopados) */
-  cacDimChart('chCamp', Sc.fM, Sc.fS, 'camp');
-  cacDimChart('chAdset', Sa.fM, Sa.fS, 'adset');
-  cacDimChart('chAd', Sd.fM, Sd.fS, 'ad');
+  cacDimChart('chCamp', Sc.fM, Sc.fS, 'camp', STATE.mSelC);
+  cacDimChart('chAdset', Sa.fM, Sa.fS, 'adset', STATE.mSelA);
+  cacDimChart('chAd', Sd.fM, Sd.fS, 'ad', STATE.mSelAd);
 
   const vendas=fS.reduce((s,r)=>s+r.main,0);
   document.getElementById('qCount').textContent=vendas+' vendas · '+fS.length+' linhas';
