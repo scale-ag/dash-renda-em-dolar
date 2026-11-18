@@ -89,8 +89,9 @@ function colWidth(cfg,c){ const saved=(STATE.colw[cfg.id]||{})[c.key];
   if(saved) return saved;
   if(c.w) return c.w;
   if(c.type==='date') return 96;
-  if(c.type==='dim') return c.big?300:150;
-  return 88; }
+  if(c.type==='dim') return c.big?230:150;
+  if(c.key==='gasto'||c.key==='fat') return 108;   /* R$ 000.000,00 cabe sem cortar */
+  return 80; }
 function renderTable(cfg){
   const table=document.getElementById(cfg.id); if(!table) return;
   const sortState=STATE.sort[cfg.id];
@@ -259,24 +260,34 @@ function kpiCard(k){ return `<div class="kpi ${k.hero?'hero':''}"><div class="kl
 const METRIC_COLS=[
   {key:'gasto',label:'Gasto',type:'brl',heat:'gasto'},   /* heatmap vermelho */
   {key:'cpm',label:'CPM',type:'brl'},
+  {key:'cpc',label:'CPC',type:'brl'},
   {key:'ctr',label:'CTR',type:'pct'},
   {key:'cr',label:'CR',type:'pct'},
-  {key:'vischk',label:'VisCHK',type:'pct'},
-  {key:'convchk',label:'ConvCHK',type:'pct'},
+  {key:'cpic',label:'Custo Initiate Checkout',type:'brl'},
+  {key:'vischk',label:'Tx Checkout',type:'pct'},          /* Checkouts / Page Views */
   {key:'vendas',label:'Vendas',type:'int'},
   {key:'cac',label:'CAC',type:'brl'},
+  {key:'convchk',label:'Tx de Compra',type:'pct'},        /* Vendas / Checkouts */
   {key:'fat',label:'Faturamento',type:'brl',heat:'fat'},  /* heatmap verde */
-  {key:'ticket',label:'Ticket',type:'brl'},
+  {key:'ticket',label:'Ticket Médio',type:'brl'},
   {key:'roas',label:'ROAS',type:'roas',heat:'roas'},      /* heatmap amarelo */
 ];
 const DAILY_COLS=[{key:'date',label:'Data',type:'date'},{key:'wd',label:'Dia',type:'dim',w:64}].concat(METRIC_COLS);
 const HCOLS=[{key:'dim',label:'',type:'dim',big:true}].concat(METRIC_COLS.map(c=>{const o={...c}; delete o.heat; return o;}));
 function metricCells(x,d){
-  return {gasto:d.gasto, cpm:d.cpm, ctr:d.ctr, cr:d.cr, vischk:d.vischk, convchk:d.convchk,
-    vendas:x.vendas, cac:d.cac, fat:x.fat, ticket:d.ticket, roas:d.roas};
+  return {gasto:d.gasto, cpm:d.cpm, cpc:d.cpc, ctr:d.ctr, cr:d.cr, cpic:d.cpic, vischk:d.vischk,
+    vendas:x.vendas, cac:d.cac, convchk:d.convchk, fat:x.fat, ticket:d.ticket, roas:d.roas};
 }
 function dailyCells(x,d,isTotal){
   return Object.assign({date:isTotal?null:x.d, wd:isTotal?'':weekday(x.d)}, metricCells(x,d));
+}
+
+/* mesmas colunas/ordem de METRIC_COLS, no formato das tabelas da aba Relatórios
+   (cor de meta só em CAC e ROAS) */
+function relMetricCells(d,vendas){
+  return [{v:brl(d.gasto)},{v:brl(d.cpm)},{v:brl(d.cpc)},{v:pct(d.ctr)},{v:pct(d.cr)},
+    {v:brl(d.cpic)},{v:pct(d.vischk)},{v:intf(vendas)},{v:brl(d.cac),cls:relColor(d.cac,'cac')},
+    {v:pct(d.convchk)},{v:brl(d.fat)},{v:brl(d.ticket)},{v:roasf(d.roas),cls:relColor(d.roas,'roas')}];
 }
 
 /* ---------------- tabela Vendas por produto ---------------- */
@@ -329,8 +340,8 @@ function funnelSteps(t, tp){
     ['Impressões', intf(t.im), [['CPM',brl(d.cpm)]], 'impr', '--c6', deltaBadge(t.im, P('im'), 'im')],
     ['Cliques', intf(t.cl), [['CPC',brl(d.cpc)],['CTR',pct(d.ctr)]], 'cl', '--c1', deltaBadge(t.cl, P('cl'), 'cl')],
     ['Page Views', intf(t.pv), [['CPV',brl(d.cpv)],['CR',pct(d.cr)]], 'pv', '--c4', deltaBadge(t.pv, P('pv'), 'pv')],
-    ['Checkouts', intf(t.ck), [['CPIC',brl(d.cpic)],['VisCHK',pct(d.vischk)]], 'ck', '--c3', deltaBadge(t.ck, P('ck'), 'ck')],
-    ['Vendas', intf(t.vendas), [['CAC',brl(d.cac),'cac'],['ConvCHK',pct(d.convchk)]], 'vendas', '--c7', deltaBadge(t.vendas, P('vendas'), 'vendas')],
+    ['Checkouts', intf(t.ck), [['Custo IC',brl(d.cpic)],['Tx Checkout',pct(d.vischk)]], 'ck', '--c3', deltaBadge(t.ck, P('ck'), 'ck')],
+    ['Vendas', intf(t.vendas), [['CAC',brl(d.cac),'cac'],['Tx de Compra',pct(d.convchk)]], 'vendas', '--c7', deltaBadge(t.vendas, P('vendas'), 'vendas')],
     ['Faturamento', brl(t.fat), [['ROAS',roasf(d.roas),'roas'],['Ticket Médio',brl(d.ticket)]], 'fat', '--heat-fat', deltaBadge(t.fat, P('fat'), 'fat')],
   ];
 }
@@ -338,9 +349,9 @@ function convCharts(id1,id2,id3,dd){
   multiLine(id1, dd, [{label:'CPM',fn:x=>x.im?+((x.sp*taxf())/x.im*1000).toFixed(2):null,color:cvar('--chart-cpm'),fmt:'brl',axis:'L'},
      {label:'CTR',fn:x=>x.im?+(x.cl/x.im).toFixed(4):null,color:cvar('--chart-ctr'),fmt:'pct',axis:'R'}], {L:{fmt:'brl'},R:{fmt:'pct'}});
   multiLine(id2, dd, [{label:'CR',fn:x=>x.cl?+(x.pv/x.cl).toFixed(4):null,color:cvar('--chart-cr'),fmt:'pct',axis:'L'},
-     {label:'VisCHK',fn:x=>x.pv?+(x.ck/x.pv).toFixed(4):null,color:cvar('--chart-vischk'),fmt:'pct',axis:'L'}], {L:{fmt:'pct'}});
+     {label:'Tx Checkout',fn:x=>x.pv?+(x.ck/x.pv).toFixed(4):null,color:cvar('--chart-vischk'),fmt:'pct',axis:'L'}], {L:{fmt:'pct'}});
   multiLine(id3, dd, [{label:'ConvLP',fn:x=>x.pv?+(x.vendasM/x.pv).toFixed(4):null,color:cvar('--chart-convlp'),fmt:'pct',axis:'L'},
-     {label:'ConvCHK',fn:x=>x.ck?+(x.vendasM/x.ck).toFixed(4):null,color:cvar('--chart-vischk'),fmt:'pct',axis:'L'}], {L:{fmt:'pct'}});
+     {label:'Tx de Compra',fn:x=>x.ck?+(x.vendasM/x.ck).toFixed(4):null,color:cvar('--chart-vischk'),fmt:'pct',axis:'L'}], {L:{fmt:'pct'}});
 }
 
 /* ---------------- PAGE 1: Visão Geral ---------------- */
@@ -522,14 +533,11 @@ function renderRelatorios(){
   /* visão por campanha (só Meta Ads) */
   const aggC=buildAgg(fSads,fM,'camp');
   const crows=Object.entries(aggC).sort((a,b)=>b[1].sp-a[1].sp).map(([name,ag])=>{ const d=derive(ag);
-    return [{v:esc(name),cls:'dim'},{v:brl(d.gasto)},{v:intf(ag.vendas)},
-      {v:roasf(d.roas),cls:relColor(d.roas,'roas')},{v:brl(d.cac),cls:relColor(d.cac,'cac')},
-      {v:brl(d.cpm)},{v:pct(d.ctr)},{v:pct(d.cr)},{v:pct(d.vischk)},{v:pct(d.convchk)}]; });
+    return [{v:esc(name),cls:'dim'}].concat(relMetricCells(d,ag.vendas)); });
   relRenderTable('relCamp',
-    [{label:'Campanha',cls:'dim'},{label:'Gasto'},{label:'Venda'},{label:'ROAS'},{label:'CAC'},{label:'CPM'},{label:'CTR'},{label:'CR'},{label:'VisCHK'},{label:'ConvCHK'}],
+    [{label:'Campanha',cls:'dim'}].concat(METRIC_COLS.map(c=>({label:c.label}))),
     crows,
-    [{v:'Total',cls:'dim'},{v:brl(dvA.gasto)},{v:intf(tAds.vendas)},{v:roasf(dvA.roas),cls:relColor(dvA.roas,'roas')},{v:brl(dvA.cac),cls:relColor(dvA.cac,'cac')},
-     {v:brl(dvA.cpm)},{v:pct(dvA.ctr)},{v:pct(dvA.cr)},{v:pct(dvA.vischk)},{v:pct(dvA.convchk)}]);
+    [{v:'Total',cls:'dim'}].concat(relMetricCells(dvA,tAds.vendas)));
 
   /* top / piores anúncios (só Meta Ads, com gasto no período) */
   const aggAd=buildAgg(fSads,fM,'ad');
