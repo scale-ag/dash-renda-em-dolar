@@ -73,6 +73,11 @@ META_START_DATE = ""
 # casar com uma linha do Meta. Vazio = só o match campanha+anúncio vale.
 META_UTM_SOURCES = []   # ex.: ["fb"]
 
+# Ticket fixo por venda do produto principal (R$). > 0 = Faturamento e ROAS
+# calculados como vendas × este valor, ignorando a coluna Valor da planilha.
+# 0 = usa a coluna Valor (padrão). 
+FIXED_TICKET = 0
+
 # ==========================================================================
 # 3) RÓTULOS EXIBIDOS NA INTERFACE
 # ==========================================================================

@@ -98,6 +98,12 @@ if AD_UTM_COLUMN not in _AD_UTM_VALIDAS:
 # parâmetro quebrado...). Vazio -> só o match campanha+anúncio define meta=1.
 META_UTM_SOURCES = {v.strip().lower() for v in getattr(cfg, "META_UTM_SOURCES", ()) if v}
 
+# Ticket fixo (R$) — quando > 0, cada venda do produto principal passa a valer
+# exatamente esse valor e as demais (orderbumps/upsells) valem 0, ignorando a
+# coluna de valor da planilha. Faturamento e ROAS viram vendas × ticket.
+# Uso temporário, enquanto a coluna de valor da planilha não é confiável.
+FIXED_TICKET = float(getattr(cfg, "FIXED_TICKET", 0) or 0)
+
 # Data mínima (AAAA-MM-DD) das vendas consideradas — ex.: início das queries do
 # Meta Ads, para não comparar vendas sem o gasto correspondente. Vazio = todas.
 SALES_START_DATE = (getattr(cfg, "SALES_START_DATE", "") or "").strip()
@@ -400,7 +406,8 @@ def process(meta_rows, sales_rows):
             "d": sale_day,
             "camp": camp, "adset": adset, "ad": ad,
             "prod": prod or "—",
-            "val": round(to_float(cell(row, sidx["val"])), 2),
+            "val": (FIXED_TICKET if main else 0.0) if FIXED_TICKET > 0
+                   else round(to_float(cell(row, sidx["val"])), 2),
             "main": 1 if main else 0,
             # meta=1 quando a venda casa com campanha+anúncio real do Meta (tráfego
             # pago). Vendas do produto principal sem esse match (orgânico/direto, ou
@@ -426,6 +433,7 @@ def process(meta_rows, sales_rows):
             "tax_label": TAX_LABEL,
             "main_product": MAIN_PRODUCT,
             "main_product_prefix": MAIN_PRODUCT_PREFIX,
+            "fixed_ticket": FIXED_TICKET,
             "ia_worker_url": IA_WORKER_URL,
             # Metas da aba Relatórios (código de cor de CAC/ROAS)
             "cac_target": CAC_TARGET,

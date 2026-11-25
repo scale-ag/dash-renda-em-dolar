@@ -130,6 +130,10 @@ Verificado em 14/10/2026:
   descarta as vendas anteriores. Sem coluna de status (toda linha = compra
   aprovada → `COUNT_ALL_AS_PAID = True`); reembolsos ficam na aba
   DADOS_HOTMART_REEMBOLSO (não usada).
+- **Ticket fixo provisório (desde 25/11/2026):** `FIXED_TICKET = 286.51` em
+  `build/config.py` — cada venda do produto principal vale R$ 286,51 (orderbumps 0),
+  e Faturamento/ROAS = vendas × 286,51, ignorando a coluna `Valor` até a planilha
+  de vendas ser ajustada. Para voltar ao valor da planilha: `FIXED_TICKET = 0`.
 - Não usar as outras abas da planilha de vendas (FINANCEIRO, FCA, CRIATIVOS,
   LINKS CRIATIVOS, PERFORMANCE_LP, [SEND] - META ADS / GOOGLE ADS).
 

@@ -844,6 +844,10 @@ document.getElementById('mainProdNote').textContent=MAIN_PRODUCT;
 document.getElementById('mainProdNoteG').textContent=MAIN_PRODUCT;
 document.getElementById('mainProdNoteProdG').textContent=MAIN_PRODUCT;
 document.getElementById('mainProdNoteProdM').textContent=MAIN_PRODUCT;
+/* Ticket fixo (FIXED_TICKET em build/config.py): avisa nas notas que Faturamento/ROAS
+   são vendas × ticket, não o valor da planilha. */
+if(B.fixed_ticket>0){ const t=' · Faturamento/ROAS calculados com ticket fixo de '+brl(B.fixed_ticket)+' por venda (provisório).';
+  ['mainProdNote','mainProdNoteG'].forEach(id=>{const el=document.getElementById(id); if(el&&el.parentNode) el.parentNode.appendChild(document.createTextNode(t));}); }
 document.getElementById('updated').innerHTML='Última atualização:<br>'+B.generated_at_brt+' (BRT)';
 document.getElementById('buildFoot').textContent='build __BUILD_ID__';
 document.getElementById('buildFoot2').textContent='· build __BUILD_ID__';
